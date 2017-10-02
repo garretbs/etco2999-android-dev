@@ -7,7 +7,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 
 public class Greeting extends AppCompatActivity {
@@ -19,9 +24,10 @@ public class Greeting extends AppCompatActivity {
 
     ListView myListView;
     ArrayList<String> myStringArray1 = new ArrayList<String>();
-    private ArrayList<String> myStringArray2 = new ArrayList<String>();
     ArrayAdapter<String> myArrayAdapter;
 
+    final int port = 1101;
+    final String address = "206.21.94.228";
 
     /*
     Build an app which features dynamic content which updates according to lifecycle callback events.
@@ -53,6 +59,32 @@ public class Greeting extends AppCompatActivity {
 
     }
 
+
+    public void doClientStuff(){
+        new Thread(){
+            public void run(){
+                try {
+                    SocketAddress clientAddress = new InetSocketAddress(address, port);
+
+                    Socket host = new Socket();
+                    host.connect(clientAddress, port);
+
+                    String message = "BOING! The time is " + new Date().toString();
+                    host.getOutputStream().write(message.getBytes("UTF-8"));
+                    host.getOutputStream().write('\n');
+                    host.getOutputStream().flush();
+                    host.getOutputStream().close();
+
+                    host.close();
+                    }catch(IOException e){
+                        return;
+                    }
+            }
+
+        }.start();
+
+    }
+
     public void doButtonStuff(View v){
         Button butt = (Button) v;
         Random randy = new Random();
@@ -62,6 +94,8 @@ public class Greeting extends AppCompatActivity {
         buttonB = randy.nextInt(255);
         changeButtColor(butt);
         myArrayAdapter.add("doButtonStuff()");
+
+        doClientStuff();
 
     }
 
